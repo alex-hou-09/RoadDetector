@@ -131,8 +131,6 @@ def detect_video():
             if not ret:
                 break
             frame_count += 1
-            if frame_count > 90:
-                break
             if frame_count % 6 != 0:  # process every 3rd frame for speed
                 writer.append_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                 continue

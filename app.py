@@ -161,8 +161,18 @@ def detect_video():
 
         os.unlink(tmp_in_path)
 
-        static_video_path = os.path.join(os.path.dirname(__file__), "static", "result.mp4")
-        os.replace(tmp_out_path, static_video_path)
+        import subprocess, tempfile as tf2
+        with tf2.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_h264:
+            tmp_h264_path = tmp_h264.name
+        subprocess.run([
+            "ffmpeg", "-y", "-i", tmp_out_path,
+            "-vcodec", "libx264", "-pix_fmt", "yuv420p",
+            tmp_h264_path
+        ], check=True)
+        os.unlink(tmp_out_path)
+        with open(tmp_h264_path, "rb") as f:
+            video_b64 = base64.b64encode(f.read()).decode()
+        os.unlink(tmp_h264_path)
 
         # Aggregate detections
         agg = {}
@@ -173,7 +183,7 @@ def detect_video():
         final = sorted(agg.values(), key=lambda x: x["score"], reverse=True)
 
         return jsonify({
-            "result_video": "/result.mp4?t=" + str(int(__import__('time').time())),
+            "result_video": "data:video/mp4;base64," + video_b64,
             "detections": final
         })
     except Exception as e:

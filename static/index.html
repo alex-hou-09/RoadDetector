@@ -1,0 +1,1431 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RoadDetector</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0b0f1a;
+        --surface: #111827;
+        --surface2: #1a2236;
+        --border: #1e2d45;
+        --accent: #3b82f6;
+        --accent2: #60a5fa;
+        --text: #e2e8f0;
+        --muted: #64748b;
+        --success: #22c55e;
+        --warning: #f59e0b;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      /* HERO */
+      .hero {
+        text-align: center;
+        padding: 56px 24px 40px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse 70% 60% at 50% 0%,
+          rgba(59, 130, 246, 0.12) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(59, 130, 246, 0.12);
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        border-radius: 99px;
+        padding: 4px 14px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--accent2);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+      }
+      .hero h1 {
+        font-size: clamp(2.2rem, 5vw, 3.6rem);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 12px;
+      }
+      .hero p {
+        font-size: 1rem;
+        color: var(--muted);
+        max-width: 440px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+
+      /* TABS */
+      .tab-bar {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+        padding: 0 24px 32px;
+      }
+      .tab-btn {
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--muted);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 13.5px;
+        font-weight: 500;
+        padding: 9px 20px;
+        transition: all 0.2s ease;
+      }
+      .tab-btn:hover {
+        color: var(--text);
+        border-color: var(--accent);
+      }
+      .tab-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+
+      /* MAIN CONTENT */
+      .content {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 24px 60px;
+      }
+
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+        animation: slideIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* TWO-PANEL GRID */
+      .panel-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      @media (max-width: 700px) {
+        .panel-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .panel-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .panel-header .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      .panel-body {
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      /* DROPZONE */
+      .dropzone {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        border: 2px dashed var(--border);
+        border-radius: 0 0 12px 12px;
+        transition: all 0.2s ease;
+        padding: 24px;
+        text-align: center;
+      }
+      .dropzone:hover,
+      .dropzone.drag-over {
+        border-color: var(--accent);
+        background: rgba(59, 130, 246, 0.04);
+      }
+      .dropzone input {
+        display: none;
+      }
+      .dropzone-icon {
+        font-size: 36px;
+        opacity: 0.4;
+      }
+      .dropzone-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .dropzone-sub {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .preview-img {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        object-fit: contain;
+        display: block;
+        background: #000;
+        border-radius: 0 0 12px 12px;
+      }
+
+      /* DETECT BUTTON */
+      .detect-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        letter-spacing: 0.02em;
+        transition: all 0.2s ease;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .detect-btn:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+      }
+      .detect-btn:disabled {
+        background: var(--muted);
+        cursor: not-allowed;
+        transform: none;
+      }
+      .detect-btn .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* RESULT PANEL STATES */
+      .result-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 13px;
+        padding: 24px;
+        text-align: center;
+      }
+      .result-empty-icon {
+        font-size: 32px;
+        opacity: 0.3;
+      }
+
+      /* DETECTIONS LIST */
+      .detections-section {
+        margin-top: 0;
+      }
+      .detections-title {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+      .detection-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .detection-item {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: slideIn 0.25s ease both;
+      }
+      .detection-rank {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        width: 20px;
+        text-align: center;
+      }
+      .detection-label {
+        font-size: 13px;
+        font-weight: 500;
+        flex: 1;
+        text-transform: capitalize;
+      }
+      .detection-bar-wrap {
+        flex: 2;
+        background: var(--surface2);
+        border-radius: 99px;
+        height: 5px;
+        overflow: hidden;
+      }
+      .detection-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        border-radius: 99px;
+        transition: width 0.5s ease;
+      }
+      .detection-score {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--accent2);
+        width: 40px;
+        text-align: right;
+      }
+
+      /* SAMPLE IMAGES */
+      .samples-section {
+        margin-top: 24px;
+      }
+      .samples-title {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+      .samples-grid {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .sample-thumb {
+        width: 80px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 6px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+        opacity: 0.7;
+      }
+      .sample-thumb:hover,
+      .sample-thumb.selected {
+        border-color: var(--accent);
+        opacity: 1;
+        transform: scale(1.04);
+      }
+
+      /* THRESHOLD SLIDERS */
+      .threshold-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      @media (max-width: 600px) {
+        .threshold-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .threshold-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .threshold-label {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .threshold-desc {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 16px;
+        line-height: 1.5;
+      }
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      input[type="range"] {
+        flex: 1;
+        -webkit-appearance: none;
+        height: 4px;
+        background: var(--surface2);
+        border-radius: 99px;
+        outline: none;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+      .slider-val {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--accent2);
+        width: 36px;
+        text-align: right;
+      }
+
+      /* EDU CARDS */
+      .edu-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
+      }
+      .edu-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .edu-card h3 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .edu-card p {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .edu-tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-top: 8px;
+      }
+      .edu-tag.blue {
+        background: rgba(59, 130, 246, 0.15);
+        color: var(--accent2);
+      }
+      .edu-tag.green {
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+      }
+      .edu-tag.amber {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+      }
+
+      /* AUTONOMOUS DRIVING BOX */
+      .driving-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 16px;
+      }
+      .driving-box-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .driving-pulse {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--success);
+        box-shadow: 0 0 6px var(--success);
+        animation: pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+      .driving-text {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .driving-action {
+        margin-top: 10px;
+        font-size: 13px;
+        color: var(--text);
+        background: var(--surface2);
+        border-left: 3px solid var(--accent);
+        padding: 10px 14px;
+        border-radius: 0 8px 8px 0;
+      }
+
+      /* COMING SOON */
+      .coming-soon {
+        text-align: center;
+        padding: 60px 24px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .coming-soon-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+      .coming-soon h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .coming-soon p {
+        font-size: 14px;
+        color: var(--muted);
+        max-width: 360px;
+        margin: 0 auto;
+        line-height: 1.6;
+      }
+
+      /* ERROR */
+      .error-msg {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 13px;
+        color: #fca5a5;
+        margin-bottom: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hero">
+      <div class="hero-eyebrow">🛣️ YOLOv3 · Real-Time Detection</div>
+      <h1>RoadDetector</h1>
+      <p>
+        Upload a road image and let the model find every vehicle, pedestrian,
+        and obstacle in seconds.
+      </p>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('image')">
+        📷 Image Detection
+      </button>
+      <button class="tab-btn" onclick="switchTab('video')">
+        🎞 Video Detection
+      </button>
+      <button class="tab-btn" onclick="switchTab('threshold')">
+        ⚙️ Threshold Explorer
+      </button>
+    </div>
+
+    <div class="content">
+      <!-- IMAGE DETECTION TAB -->
+      <div class="tab-panel active" id="tab-image">
+        <div class="panel-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="dot"></span>Upload Image
+            </div>
+            <div class="panel-body" id="input-panel-body">
+              <div
+                class="dropzone"
+                id="dropzone"
+                onclick="document.getElementById('file-input').click()"
+                ondragover="handleDragOver(event)"
+                ondragleave="handleDragLeave(event)"
+                ondrop="handleDrop(event, 'image')"
+              >
+                <input
+                  type="file"
+                  id="file-input"
+                  accept="image/*"
+                  onchange="handleFileSelect(event, 'image')"
+                />
+                <div class="dropzone-icon">🖼️</div>
+                <div class="dropzone-title">Drop image here</div>
+                <div class="dropzone-sub">or click to upload · JPG, PNG</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <span class="dot"></span>Detection Result
+            </div>
+            <div class="panel-body" id="result-panel-body">
+              <div class="result-empty">
+                <div class="result-empty-icon">🔍</div>
+                <div>Result appears here after detection</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="image-error" style="display: none"></div>
+        <button
+          class="detect-btn"
+          id="detect-btn"
+          onclick="runDetection()"
+          disabled
+        >
+          🔍 Detect Objects
+        </button>
+
+        <div id="driving-box-image" style="display: none" class="driving-box">
+          <div class="driving-box-header">
+            <div class="driving-pulse"></div>
+            Autonomous Driving Analysis
+          </div>
+          <div
+            style="
+              font-size: 12px;
+              color: var(--muted);
+              margin-bottom: 12px;
+              line-height: 1.5;
+            "
+          >
+            Based on what the car's camera sees, this is the decision an
+            autonomous vehicle would make in real time. One of three responses
+            will appear:
+            <span style="color: #22c55e; font-weight: 600">Continue</span>,
+            <span style="color: #f59e0b; font-weight: 600">Slow Down</span>, or
+            <span style="color: #ef4444; font-weight: 600"
+              >Stop Immediately</span
+            >.
+          </div>
+          <div class="driving-text" id="driving-text-image">
+            Analyzing scene...
+          </div>
+          <div class="driving-action" id="driving-action-image"></div>
+        </div>
+
+        <div
+          class="detections-section"
+          id="detections-section"
+          style="display: none"
+        >
+          <div style="height: 16px"></div>
+          <div
+            class="detections-title"
+            onclick="toggleDetections()"
+            style="
+              cursor: pointer;
+              user-select: none;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            Detected Objects — ranked by confidence
+            <span
+              id="detections-chevron"
+              style="transition: transform 0.25s ease"
+              >▾</span
+            >
+          </div>
+          <div
+            class="detection-list"
+            id="detection-list"
+            style="
+              overflow: hidden;
+              transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+              max-height: 600px;
+            "
+          ></div>
+        </div>
+
+        <div class="samples-section">
+          <div class="samples-title">Sample Images</div>
+          <div class="samples-grid" id="sample-grid-image"></div>
+        </div>
+      </div>
+
+      <!-- VIDEO DETECTION TAB -->
+      <!-- VIDEO DETECTION TAB -->
+      <div class="tab-panel" id="tab-video">
+        <div class="panel-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="dot"></span>Webcam Recording
+            </div>
+            <div class="panel-body" style="flex-direction: column; gap: 0">
+              <video
+                id="webcam-preview"
+                style="
+                  width: 100%;
+                  border-radius: 0 0 12px 12px;
+                  background: #000;
+                  display: block;
+                "
+                autoplay
+                muted
+                playsinline
+              ></video>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <span class="dot"></span>Detection Result
+            </div>
+            <div class="panel-body" id="video-result-body">
+              <div class="result-empty">
+                <div class="result-empty-icon">🎞</div>
+                <div>Result appears after processing</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 16px">
+          <button
+            class="detect-btn"
+            id="record-btn"
+            onclick="startRecording()"
+            style="margin-bottom: 0"
+          >
+            🔴 Start Recording
+          </button>
+          <button
+            class="detect-btn"
+            id="stop-btn"
+            onclick="stopRecording()"
+            style="margin-bottom: 0; background: var(--surface2); display: none"
+          >
+            ⏹ Stop & Analyze
+          </button>
+        </div>
+
+        <div id="video-error" style="display: none"></div>
+
+        <div id="driving-box-video" style="display: none" class="driving-box">
+          <div class="driving-box-header">
+            <div class="driving-pulse"></div>
+            Autonomous Driving Analysis
+          </div>
+          <div
+            style="
+              font-size: 12px;
+              color: var(--muted);
+              margin-bottom: 12px;
+              line-height: 1.5;
+            "
+          >
+            Based on what the car's camera sees, this is the decision an
+            autonomous vehicle would make in real time. One of three responses
+            will appear:
+            <span style="color: #22c55e; font-weight: 600">Continue</span>,
+            <span style="color: #f59e0b; font-weight: 600">Slow Down</span>, or
+            <span style="color: #ef4444; font-weight: 600"
+              >Stop Immediately</span
+            >.
+          </div>
+          <div class="driving-text" id="driving-text-video"></div>
+          <div class="driving-action" id="driving-action-video"></div>
+        </div>
+
+        <div id="video-detections-section" style="display: none">
+          <div style="height: 16px"></div>
+          <div class="detections-title">
+            Detected Objects — ranked by confidence
+          </div>
+          <div class="detection-list" id="video-detection-list"></div>
+        </div>
+      </div>
+
+      <!-- THRESHOLD EXPLORER TAB -->
+      <div class="tab-panel" id="tab-threshold">
+        <div class="edu-cards">
+          <div class="edu-card">
+            <h3>Objectness Threshold</h3>
+            <p>
+              Filters weak detections. A bounding box only appears if its
+              confidence score meets this value.
+            </p>
+            <span class="edu-tag blue">Lower → more detections</span>
+            <span class="edu-tag amber">Higher → only confident ones</span>
+          </div>
+          <div class="edu-card">
+            <h3>NMS Threshold</h3>
+            <p>
+              Non-Maximum Suppression merges duplicate boxes on the same object.
+              Boxes with IoU above this value are merged.
+            </p>
+            <span class="edu-tag blue">Lower → aggressive merging</span>
+            <span class="edu-tag amber"
+              >Higher → overlapping boxes survive</span
+            >
+          </div>
+          <div class="edu-card">
+            <h3>Typical Settings</h3>
+            <p>
+              <strong>General road:</strong> obj=0.40, nms=0.45<br />
+              <strong>High recall (safety):</strong> obj=0.25, nms=0.50<br />
+              <strong>High precision:</strong> obj=0.60, nms=0.40
+            </p>
+            <span class="edu-tag green">Try them on the samples →</span>
+          </div>
+        </div>
+
+        <div class="threshold-grid">
+          <div class="threshold-card">
+            <div class="threshold-label">Objectness Threshold</div>
+            <div class="threshold-desc">
+              Minimum confidence score for a box to appear.
+            </div>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="obj-slider"
+                min="0.05"
+                max="0.95"
+                step="0.05"
+                value="0.40"
+                oninput="
+                  document.getElementById('obj-val').textContent = parseFloat(
+                    this.value,
+                  ).toFixed(2)
+                "
+              />
+              <div class="slider-val" id="obj-val">0.40</div>
+            </div>
+          </div>
+          <div class="threshold-card">
+            <div class="threshold-label">NMS Threshold</div>
+            <div class="threshold-desc">
+              IoU cutoff for merging overlapping boxes.
+            </div>
+            <div class="slider-row">
+              <input
+                type="range"
+                id="nms-slider"
+                min="0.05"
+                max="0.95"
+                step="0.05"
+                value="0.45"
+                oninput="
+                  document.getElementById('nms-val').textContent = parseFloat(
+                    this.value,
+                  ).toFixed(2)
+                "
+              />
+              <div class="slider-val" id="nms-val">0.45</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="samples-section">
+          <div class="samples-title">Select a Sample Image</div>
+          <div class="samples-grid" id="sample-grid-threshold"></div>
+        </div>
+
+        <div class="panel-grid" style="margin-top: 16px">
+          <div class="panel">
+            <div class="panel-header">
+              <span class="dot"></span>Selected Image
+            </div>
+            <div class="panel-body" id="thresh-input-body">
+              <div class="result-empty">
+                <div class="result-empty-icon">🖼️</div>
+                <div>Pick a sample above</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <span class="dot"></span>Detection Result
+            </div>
+            <div class="panel-body" id="thresh-result-body">
+              <div class="result-empty">
+                <div class="result-empty-icon">🔍</div>
+                <div>Result appears after running</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="threshold-error" style="display: none"></div>
+        <button
+          class="detect-btn"
+          id="thresh-detect-btn"
+          onclick="runThresholdDetection()"
+          disabled
+          style="margin-top: 16px"
+        >
+          ▶ Run with These Settings
+        </button>
+
+        <div
+          id="driving-box-threshold"
+          style="display: none"
+          class="driving-box"
+        >
+          <div class="driving-box-header">
+            <div class="driving-pulse"></div>
+            Autonomous Driving Analysis
+          </div>
+          <div
+            style="
+              font-size: 12px;
+              color: var(--muted);
+              margin-bottom: 12px;
+              line-height: 1.5;
+            "
+          >
+            Based on what the car's camera sees, this is the decision an
+            autonomous vehicle would make in real time. One of three responses
+            will appear:
+            <span style="color: #22c55e; font-weight: 600">Continue</span>,
+            <span style="color: #f59e0b; font-weight: 600">Slow Down</span>, or
+            <span style="color: #ef4444; font-weight: 600"
+              >Stop Immediately</span
+            >.
+          </div>
+          <div class="driving-text" id="driving-text-threshold">
+            Analyzing scene...
+          </div>
+          <div class="driving-action" id="driving-action-threshold"></div>
+        </div>
+
+        <div id="thresh-detections-section" style="display: none">
+          <div style="height: 16px"></div>
+          <div class="detections-title">Detected Objects</div>
+          <div class="detection-list" id="thresh-detection-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- State ---
+      let currentImageB64 = null; // for image tab
+      let currentThreshImageB64 = null; // for threshold tab
+
+      // --- Tab switching ---
+      function switchTab(name) {
+        document
+          .querySelectorAll(".tab-panel")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById("tab-" + name).classList.add("active");
+        event.target.classList.add("active");
+        resetResults();
+      }
+
+      function resetResults() {
+        // Hide driving boxes
+        [
+          "driving-box-image",
+          "driving-box-video",
+          "driving-box-threshold",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = "none";
+        });
+        // Hide detection lists
+        [
+          "detections-section",
+          "video-detections-section",
+          "thresh-detections-section",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = "none";
+        });
+        // Clear detection list contents
+        [
+          "detection-list",
+          "video-detection-list",
+          "thresh-detection-list",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.innerHTML = "";
+        });
+      }
+
+      // --- Drag & drop ---
+      function handleDragOver(e) {
+        e.preventDefault();
+        document.getElementById("dropzone").classList.add("drag-over");
+      }
+      function handleDragLeave(e) {
+        document.getElementById("dropzone").classList.remove("drag-over");
+      }
+      function handleDrop(e, tab) {
+        e.preventDefault();
+        document.getElementById("dropzone").classList.remove("drag-over");
+        const file = e.dataTransfer.files[0];
+        if (file) loadImageFile(file, tab);
+      }
+      function handleFileSelect(e, tab) {
+        const file = e.target.files[0];
+        if (file) loadImageFile(file, tab);
+      }
+
+      function loadImageFile(file, tab) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          currentImageB64 = e.target.result;
+          showInputPreview(e.target.result);
+          document.getElementById("detect-btn").disabled = false;
+          document.getElementById("detections-section").style.display = "none";
+          document.getElementById("driving-box-image").style.display = "none";
+          document.getElementById("result-panel-body").innerHTML =
+            `<div class="result-empty"><div class="result-empty-icon">🔍</div><div>Click Detect Objects to analyze</div></div>`;
+          document.getElementById("image-error").style.display = "none";
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function showInputPreview(src) {
+        const body = document.getElementById("input-panel-body");
+        body.innerHTML = `<img class="preview-img" src="${src}" alt="Input"/>`;
+      }
+
+      // --- Load samples ---
+      let samplesData = [];
+
+      async function loadSamples() {
+        try {
+          const res = await fetch("/api/samples");
+          samplesData = await res.json();
+          renderSampleGrids();
+        } catch (e) {
+          console.error("Could not load samples", e);
+        }
+      }
+
+      function renderSampleGrids() {
+        ["sample-grid-image", "sample-grid-threshold"].forEach((gridId) => {
+          const grid = document.getElementById(gridId);
+          grid.innerHTML = "";
+          samplesData.forEach((s, i) => {
+            const img = document.createElement("img");
+            img.className = "sample-thumb";
+            img.src = s.data;
+            img.title = s.name;
+            if (gridId === "sample-grid-image") {
+              img.onclick = () => selectSampleImage(s, img, gridId);
+            } else {
+              img.onclick = () => selectSampleThreshold(s, img, gridId);
+            }
+            grid.appendChild(img);
+          });
+        });
+      }
+
+      function selectSampleImage(s, el, gridId) {
+        document
+          .querySelectorAll(`#${gridId} .sample-thumb`)
+          .forEach((t) => t.classList.remove("selected"));
+        el.classList.add("selected");
+        currentImageB64 = s.data;
+        showInputPreview(s.data);
+        document.getElementById("detect-btn").disabled = false;
+        document.getElementById("detections-section").style.display = "none";
+        document.getElementById("driving-box-image").style.display = "none";
+        document.getElementById("result-panel-body").innerHTML =
+          `<div class="result-empty"><div class="result-empty-icon">🔍</div><div>Click Detect Objects to analyze</div></div>`;
+        document.getElementById("image-error").style.display = "none";
+      }
+
+      function selectSampleThreshold(s, el, gridId) {
+        document
+          .querySelectorAll(`#${gridId} .sample-thumb`)
+          .forEach((t) => t.classList.remove("selected"));
+        el.classList.add("selected");
+        currentThreshImageB64 = s.data;
+        document.getElementById("thresh-input-body").innerHTML =
+          `<img class="preview-img" src="${s.data}" alt="Selected"/>`;
+        document.getElementById("thresh-detect-btn").disabled = false;
+        document.getElementById("thresh-detections-section").style.display =
+          "none";
+        document.getElementById("driving-box-threshold").style.display = "none";
+        document.getElementById("thresh-result-body").innerHTML =
+          `<div class="result-empty"><div class="result-empty-icon">🔍</div><div>Click Run to analyze</div></div>`;
+        document.getElementById("threshold-error").style.display = "none";
+      }
+
+      // --- Detection ---
+      async function runDetection() {
+        if (!currentImageB64) return;
+        const btn = document.getElementById("detect-btn");
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div> Detecting…';
+        resetResults();
+        document.getElementById("image-error").style.display = "none";
+
+        try {
+          const res = await fetch("/api/detect", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+              image: currentImageB64,
+              obj_thresh: 0.4,
+              nms_thresh: 0.45,
+            }),
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+
+          document.getElementById("result-panel-body").innerHTML =
+            `<img class="preview-img" src="${data.result_image}" alt="Result"/>`;
+
+          renderDetections(data.detections, "detection-list");
+          document.getElementById("detections-section").style.display = "block";
+          renderDrivingAnalysis(
+            data.detections,
+            "driving-text-image",
+            "driving-action-image",
+            "driving-box-image",
+          );
+        } catch (e) {
+          const errEl = document.getElementById("image-error");
+          errEl.innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
+          errEl.style.display = "block";
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = "🔍 Detect Objects";
+        }
+      }
+
+      async function runThresholdDetection() {
+        if (!currentThreshImageB64) return;
+        const btn = document.getElementById("thresh-detect-btn");
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div> Running…';
+        resetResults();
+        document.getElementById("threshold-error").style.display = "none";
+
+        const objThresh = parseFloat(
+          document.getElementById("obj-slider").value,
+        );
+        const nmsThresh = parseFloat(
+          document.getElementById("nms-slider").value,
+        );
+
+        try {
+          const res = await fetch("/api/detect", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+              image: currentThreshImageB64,
+              obj_thresh: objThresh,
+              nms_thresh: nmsThresh,
+            }),
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+
+          document.getElementById("thresh-result-body").innerHTML =
+            `<img class="preview-img" src="${data.result_image}" alt="Result"/>`;
+
+          renderDetections(data.detections, "thresh-detection-list");
+          document.getElementById("thresh-detections-section").style.display =
+            "block";
+          renderDrivingAnalysis(
+            data.detections,
+            "driving-text-threshold",
+            "driving-action-threshold",
+            "driving-box-threshold",
+          );
+        } catch (e) {
+          const errEl = document.getElementById("threshold-error");
+          errEl.innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
+          errEl.style.display = "block";
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = "▶ Run with These Settings";
+        }
+      }
+
+      function renderDetections(detections, listId) {
+        const list = document.getElementById(listId);
+        if (!detections || detections.length === 0) {
+          list.innerHTML =
+            '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No objects detected at this threshold.</div>';
+          return;
+        }
+        list.innerHTML = detections
+          .slice(0, 10)
+          .map(
+            (d, i) => `
+      <div class="detection-item" style="animation-delay:${i * 0.04}s">
+        <div class="detection-rank">#${i + 1}</div>
+        <div class="detection-label">${d.label}</div>
+        <div class="detection-bar-wrap">
+          <div class="detection-bar" style="width:${(d.score * 100).toFixed(0)}%"></div>
+        </div>
+        <div class="detection-score">${(d.score * 100).toFixed(0)}%</div>
+      </div>
+    `,
+          )
+          .join("");
+      }
+
+      function toggleDetections() {
+        const list = document.getElementById("detection-list");
+        const chevron = document.getElementById("detections-chevron");
+        const isOpen = list.style.maxHeight !== "0px";
+        list.style.maxHeight = isOpen ? "0px" : "600px";
+        chevron.style.transform = isOpen ? "rotate(-90deg)" : "rotate(0deg)";
+      }
+
+      function renderDrivingAnalysis(detections, textId, actionId, boxId) {
+        const box = document.getElementById(boxId);
+        const textEl = document.getElementById(textId);
+        const actionEl = document.getElementById(actionId);
+
+        if (!detections || detections.length === 0) {
+          textEl.textContent = "No objects detected in the scene.";
+          actionEl.innerHTML =
+            '<span style="font-weight:700;color:#22c55e">✅ Continue driving — the path ahead is clear.</span>';
+          actionEl.style.borderLeftColor = "#22c55e";
+          box.style.display = "block";
+          return;
+        }
+
+        const labels = detections.map((d) => d.label);
+        const counts = {};
+        labels.forEach((l) => (counts[l] = (counts[l] || 0) + 1));
+
+        const hasClose = detections.some((d) => {
+          const [x1, y1, x2, y2] = d.box;
+          const area = (x2 - x1) * (y2 - y1);
+          return area > 60000;
+        });
+        const hasMid = detections.some((d) => {
+          const [x1, y1, x2, y2] = d.box;
+          const area = (x2 - x1) * (y2 - y1);
+          return area > 15000 && area <= 60000;
+        });
+
+        const dangerLabels = [
+          "person",
+          "bicycle",
+          "motorbike",
+          "car",
+          "truck",
+          "bus",
+          "train",
+          "stop sign",
+          "traffic light",
+        ];
+        const hasCloseeDanger = detections.some((d) => {
+          const [x1, y1, x2, y2] = d.box;
+          const area = (x2 - x1) * (y2 - y1);
+          return area > 60000 && dangerLabels.includes(d.label);
+        });
+        const hasMidDanger = detections.some((d) => {
+          const [x1, y1, x2, y2] = d.box;
+          const area = (x2 - x1) * (y2 - y1);
+          return (
+            area > 15000 && area <= 60000 && dangerLabels.includes(d.label)
+          );
+        });
+
+        let verdict, color, emoji;
+        if (hasCloseeDanger) {
+          verdict =
+            "STOP IMMEDIATELY — there are objects directly in front of the vehicle.";
+          color = "#ef4444";
+          emoji = "🛑";
+        } else if (hasMidDanger) {
+          verdict =
+            "Start to slow down — there are objects ahead in the distance.";
+          color = "#f59e0b";
+          emoji = "⚠️";
+        } else {
+          verdict = "Continue driving — the path ahead is clear.";
+          color = "#22c55e";
+          emoji = "✅";
+        }
+
+        const summary = Object.entries(counts)
+          .map(([k, v]) => `${v} ${k}${v > 1 ? "s" : ""}`)
+          .join(", ");
+        textEl.textContent = `Scene contains ${detections.length} detected object${detections.length > 1 ? "s" : ""}: ${summary}.`;
+
+        actionEl.innerHTML = `<span style="font-weight:700;color:${color}">${emoji} ${verdict}</span>`;
+        actionEl.style.borderLeftColor = color;
+        box.style.display = "block";
+      }
+
+      // --- Webcam / Video Recording ---
+      let mediaRecorder = null;
+      let recordedChunks = [];
+      let webcamStream = null;
+
+      async function initWebcam() {
+        try {
+          webcamStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          });
+          document.getElementById("webcam-preview").srcObject = webcamStream;
+        } catch (e) {
+          document.getElementById("video-error").innerHTML =
+            `<div class="error-msg">⚠️ Could not access webcam: ${e.message}</div>`;
+          document.getElementById("video-error").style.display = "block";
+        }
+      }
+
+      function startRecording() {
+        if (!webcamStream) return;
+        recordedChunks = [];
+        mediaRecorder = new MediaRecorder(webcamStream, {
+          mimeType: "video/webm",
+        });
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+        mediaRecorder.start();
+
+        document.getElementById("record-btn").style.display = "none";
+        document.getElementById("stop-btn").style.display = "flex";
+      }
+
+      async function stopRecording() {
+        if (!mediaRecorder) return;
+
+        mediaRecorder.stop();
+        resetResults();
+        document.getElementById("stop-btn").innerHTML =
+          '<div class="spinner"></div> Processing…';
+        document.getElementById("stop-btn").disabled = true;
+
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(recordedChunks, {type: "video/webm"});
+          const reader = new FileReader();
+          reader.onload = async (e) => {
+            try {
+              const res = await fetch("/api/detect/video", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({video: e.target.result}),
+              });
+              const data = await res.json();
+              if (data.error) throw new Error(data.error);
+
+              document.getElementById("video-result-body").innerHTML =
+                `<video controls autoplay style="width:100%;border-radius:0 0 12px 12px;background:#000;" src="${data.result_video}"></video>`;
+
+              renderDetections(data.detections, "video-detection-list");
+              document.getElementById(
+                "video-detections-section",
+              ).style.display = "block";
+              renderDrivingAnalysis(
+                data.detections,
+                "driving-text-video",
+                "driving-action-video",
+                "driving-box-video",
+              );
+            } catch (err) {
+              const errEl = document.getElementById("video-error");
+              errEl.innerHTML = `<div class="error-msg">⚠️ ${err.message}</div>`;
+              errEl.style.display = "block";
+            } finally {
+              document.getElementById("stop-btn").style.display = "none";
+              document.getElementById("record-btn").style.display = "flex";
+              document.getElementById("stop-btn").disabled = false;
+              document.getElementById("stop-btn").innerHTML =
+                "⏹ Stop & Analyze";
+            }
+          };
+          reader.readAsDataURL(blob);
+        };
+      }
+
+      // Init webcam when video tab is clicked
+      document.querySelectorAll(".tab-btn").forEach((btn, i) => {
+        btn.addEventListener("click", () => {
+          if (i === 1) initWebcam(); // video tab is index 1
+        });
+      });
+
+      // Init
+      loadSamples();
+    </script>
+  </body>
+</html>

@@ -118,7 +118,7 @@ def detect_video():
         with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_out:
             tmp_out_path = tmp_out.name
 
-        fourcc = cv2.VideoWriter_fourcc(*"avc1")
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         writer = cv2.VideoWriter(tmp_out_path, fourcc, fps, (width, height))
 
         model, labels, anchors = get_model()

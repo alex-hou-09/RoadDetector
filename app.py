@@ -131,7 +131,9 @@ def detect_video():
             if not ret:
                 break
             frame_count += 1
-            if frame_count % 3 != 0:  # process every 3rd frame for speed
+            if frame_count > 90:
+                break
+            if frame_count % 6 != 0:  # process every 3rd frame for speed
                 writer.write(frame)
                 continue
 

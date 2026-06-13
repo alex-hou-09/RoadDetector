@@ -1068,7 +1068,7 @@
 
       async function loadSamples() {
         try {
-          const res = await fetch("/api/samples");
+          const res = await fetch("https://roaddetector-backend.onrender.com/api/samples");
           samplesData = await res.json();
           renderSampleGrids();
         } catch (e) {
@@ -1137,7 +1137,7 @@
         document.getElementById("image-error").style.display = "none";
 
         try {
-          const res = await fetch("/api/detect", {
+          const res = await fetch("https://roaddetector-backend.onrender.com/api/detect", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
@@ -1186,7 +1186,7 @@
         );
 
         try {
-          const res = await fetch("/api/detect", {
+          const res = await fetch("https://roaddetector-backend.onrender.com/api/detect", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
@@ -1380,7 +1380,7 @@
           const reader = new FileReader();
           reader.onload = async (e) => {
             try {
-              const res = await fetch("/api/detect/video", {
+              const res = await fetch("https://roaddetector-backend.onrender.com/api/detect/video", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({video: e.target.result}),

@@ -45,8 +45,6 @@ def run_detection(pil_img, obj_thresh=0.4, nms_thresh=0.45):
     from helpers import detect_image
     model, labels, anchors = get_model()
     result_img = detect_image(pil_img, model, anchors, labels, obj_thresh=obj_thresh, nms_thresh=nms_thresh)
-    if result_img is None:
-        result_img = pil_img
 
     # Also collect detected objects with scores
     from helpers import preprocess_input, decode_netout, do_nms

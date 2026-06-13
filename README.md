@@ -1,4 +1,4 @@
-# RoadDetector
+# StreetScan
 
 Real-time road object detection powered by YOLOv3.
 

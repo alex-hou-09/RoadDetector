@@ -118,8 +118,8 @@ def detect_video():
         with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_out:
             tmp_out_path = tmp_out.name
 
-        fourcc = cv2.VideoWriter_fourcc(*"avc1")
-        writer = cv2.VideoWriter(tmp_out_path, fourcc, fps, (width, height))
+        import imageio
+        writer = imageio.get_writer(tmp_out_path, fps=fps, codec="libx264", quality=5, macro_block_size=8)
 
         model, labels, anchors = get_model()
         from helpers import preprocess_input, decode_netout, do_nms, draw_boxes
@@ -134,7 +134,7 @@ def detect_video():
             if frame_count > 90:
                 break
             if frame_count % 6 != 0:  # process every 3rd frame for speed
-                writer.write(frame)
+                writer.append_data(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
                 continue
 
             pil_img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
@@ -146,8 +146,8 @@ def detect_video():
             boxes = do_nms(boxes, 0.45, 0.4)
 
             result_pil = draw_boxes(pil_img, boxes, labels)
-            result_frame = cv2.cvtColor(np.array(result_pil), cv2.COLOR_RGB2BGR)
-            writer.write(result_frame)
+            result_frame = np.array(result_pil)
+            writer.append_data(result_frame)
 
             for box in boxes:
                 all_detections.append({
@@ -157,7 +157,7 @@ def detect_video():
                 })
 
         cap.release()
-        writer.release()
+        writer.close()
 
         os.unlink(tmp_in_path)
 

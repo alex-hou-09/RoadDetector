@@ -115,10 +115,10 @@ def detect_video():
         width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        with tempfile.NamedTemporaryFile(suffix=".webm", delete=False) as tmp_out:
+        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp_out:
             tmp_out_path = tmp_out.name
 
-        fourcc = cv2.VideoWriter_fourcc(*"VP80")
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         writer = cv2.VideoWriter(tmp_out_path, fourcc, fps, (width, height))
 
         model, labels, anchors = get_model()
@@ -174,7 +174,7 @@ def detect_video():
         final = sorted(agg.values(), key=lambda x: x["score"], reverse=True)
 
         return jsonify({
-            "result_video": "data:video/webm;base64," + video_b64,
+            "result_video": "data:video/mp4;base64," + video_b64,
             "detections": final
         })
     except Exception as e:

@@ -1,8 +1,6 @@
 # StreetScan
 
-A real-time road object detection web app powered by YOLOv3 and TensorFlow, built as the culmination of a 2-week AI program through [Inspirit AI](https://www.inspiritai.com/).
-
-🔗 **Live Demo:** [streetscan-production.up.railway.app](https://roaddetector-production.up.railway.app)
+A real-time road object detection web app powered by YOLOv3 and TensorFlow, built as the culmination of a 2-week AI program through Inspirit AI.
 
 ---
 
